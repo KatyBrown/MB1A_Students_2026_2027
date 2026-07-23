@@ -1,0 +1,28 @@
+---
+title: "UKHSA Data Analysis"
+author: "Katy Brown"
+format: html
+---
+```{r}
+library(tidyverse)
+library(gt)
+```
+
+I have downloaded the data for lead exposure data per year.
+
+```{r}
+lead <- read_csv("data/ukhsa-chart-download.csv")
+
+gt(head(lead))
+```
+
+Now I will plot the number of cases per year over time.
+
+```{r}
+ggplot(lead,
+       aes(x = date, y=metric_value)) +
+  geom_line(color='blue')  +
+  xlab("Date") +
+  ylab("Number of cases") +
+  ggtitle("Lead Exposure Cases per Year")
+```
