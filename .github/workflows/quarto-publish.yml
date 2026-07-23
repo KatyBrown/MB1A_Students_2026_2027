@@ -1,0 +1,191 @@
+name: Render and publish Quarto documents
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+      # -----------------------------------------
+      # Check out repository
+      # -----------------------------------------
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+
+      # -----------------------------------------
+      # Set up Quarto
+      # -----------------------------------------
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+
+      # -----------------------------------------
+      # Set up R
+      # -----------------------------------------
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+
+      # -----------------------------------------
+      # Install R packages
+      # -----------------------------------------
+
+      - name: Install R packages
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::tidyverse
+            any::gt
+
+
+      # -----------------------------------------
+      # Render all Quarto documents
+      # -----------------------------------------
+
+      - name: Render all Quarto documents
+        run: |
+
+          find . -type f -name "*.qmd" \
+            -not -path "./.github/*" \
+            -print0 | while IFS= read -r -d '' file; do
+
+            folder=$(dirname "$file")
+            filename=$(basename "$file")
+
+            echo ""
+            echo "=========================================="
+            echo "Rendering: $file"
+            echo "=========================================="
+
+            (
+              cd "$folder"
+              quarto render "$filename"
+            )
+
+          done
+
+
+      # -----------------------------------------
+      # Create publishing directory
+      # -----------------------------------------
+
+      - name: Create publishing directory
+        run: |
+          mkdir -p public
+
+
+      # -----------------------------------------
+      # Copy practical folders to publishing directory
+      # -----------------------------------------
+
+      - name: Copy practical folders
+        run: |
+
+          for folder in Practical_*/; do
+
+            if [ -d "$folder" ]; then
+
+              echo "Copying $folder"
+
+              cp -r "$folder" "public/$folder"
+
+            fi
+
+          done
+
+
+      # -----------------------------------------
+      # Create homepage
+      # -----------------------------------------
+
+      - name: Create homepage
+        run: |
+
+          cat > public/index.html << 'EOF'
+
+          <!DOCTYPE html>
+
+          <html>
+
+          <head>
+
+            <meta charset="UTF-8">
+
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1">
+
+            <title>MB1A_Practicals</title>
+
+          </head>
+
+          <body>
+
+          <h1>MB1A_Practicals</h1>
+
+          <p>Select a practical below:</p>
+
+          <ul>
+
+          EOF
+
+
+          for folder in Practical_*/; do
+
+            folder_name="${folder%/}"
+
+            if [ -f "public/$folder_name/index.html" ]; then
+
+              echo "<li><a href=\"$folder_name/index.html\">$folder_name</a></li>" \
+                >> public/index.html
+
+            fi
+
+          done
+
+
+          cat >> public/index.html << 'EOF'
+
+          </ul>
+
+          </body>
+
+          </html>
+
+          EOF
+
+
+      # -----------------------------------------
+      # Upload website to GitHub Pages
+      # -----------------------------------------
+
+      - name: Upload rendered site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+
+      # -----------------------------------------
+      # Deploy website
+      # -----------------------------------------
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
