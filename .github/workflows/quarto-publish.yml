@@ -1,4 +1,4 @@
-name: Render and publish Quarto documents
+name: Render and publish Quarto practicals
 
 on:
   push:
@@ -36,14 +36,48 @@ jobs:
             any::tidyverse
             any::gt
 
-      - name: Render Quarto documents
+      - name: Create site directory
         run: |
-          quarto render practical/
+          mkdir -p _site
+
+      - name: Render all practicals
+        run: |
+          for file in */index.qmd; do
+            folder=$(dirname "$file")
+            echo "Rendering $file"
+            quarto render "$file" \
+              --output-dir "../_site/$folder"
+          done
+
+      - name: Create homepage
+        run: |
+          cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>My Practical Work</title>
+          </head>
+          <body>
+          <h1>My Practical Work</h1>
+          <ul>
+          EOF
+
+          for file in */index.qmd; do
+            folder=$(dirname "$file")
+            echo "<li><a href=\"$folder/index.html\">$folder</a></li>" >> _site/index.html
+          done
+
+          cat >> _site/index.html << 'EOF'
+          </ul>
+          </body>
+          </html>
+          EOF
 
       - name: Upload rendered site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: practical/
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
