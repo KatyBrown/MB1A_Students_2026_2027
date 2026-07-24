@@ -6,6 +6,7 @@ format: html
 ```{r}
 library(tidyverse)
 library(gt)
+library(maps)
 ```
 
 Read the bird breeding site data frame and look at it with `gt()`.
