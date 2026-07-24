@@ -1,0 +1,35 @@
+---
+title: "Practical 2 Exercises"
+author: "Katy Brown"
+format: html
+---
+
+Using the pipe symbol - calculate the mean then absolute value of these numbers, then round it to the nearest whole number.
+
+```{r}
+input_vec <- c(5, 10, 4, 3)
+
+result <- input_vec |>
+  mean() |>
+  abs() |>
+  round()
+```
+
+Assign y a value of 12 and then use comparison operators to show if:
+* `y` is equal to 7
+* `y` is less than 15
+* `y` is greater than 20
+* `y` is less than or equal to 12
+
+```{r}
+
+y <- 12
+
+print(y == 7)
+
+print(y < 15)
+
+print(y > 20)
+
+print (y <= 12)
+```
