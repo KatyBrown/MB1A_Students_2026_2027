@@ -55,6 +55,8 @@ jobs:
             any::tidyverse
             any::gt
             any::maps
+            any::janitor
+            any::lubridate
 
 
       # -----------------------------------------
