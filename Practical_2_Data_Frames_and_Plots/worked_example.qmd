@@ -119,3 +119,9 @@ combined_bird_piv <- combined_bird_data |>
 
 gt(combined_bird_piv)
 ```
+
+Save file
+
+```{r}
+write_csv(combined_bird_piv, "output/combined_birds.csv")
+```
