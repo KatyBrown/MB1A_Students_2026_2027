@@ -193,7 +193,7 @@ jobs:
       - name: Create main homepage
         run: |
 
-          cat > homepage.qmd << 'EOF'
+          cat > public/homepage.qmd << 'EOF'
           ---
           title: "MB1A Practicals"
           format:
@@ -215,15 +215,20 @@ jobs:
             if [ -f "public/$folder_name/index.html" ]; then
 
               echo "- [$folder_name]($folder_name/index.html)" \
-                >> homepage.qmd
+                >> public/homepage.qmd
 
             fi
 
           done
 
 
-          quarto render homepage.qmd \
-            --output public/index.html
+          (
+            cd public
+            quarto render homepage.qmd
+          )
+
+
+          mv public/homepage.html public/index.html
 
 
       # -----------------------------------------
