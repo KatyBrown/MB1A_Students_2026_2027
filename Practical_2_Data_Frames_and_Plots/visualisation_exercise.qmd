@@ -1,0 +1,75 @@
+---
+title: "Visualisation Exercise"
+author: "Katy Brown"
+format: html
+---
+Load libraries
+
+```{r}
+library(tidyverse)
+library(gt)
+library(janitor)
+library(lubridate)
+```
+
+Read data frame
+```{r}
+locations <- read_csv("data/movebank_data.csv") |>
+  clean_names() |>
+  mutate(Date = as_date(timestamp))
+```
+
+Look at columns
+```{r}
+colnames(locations)
+```
+
+Glimpse the data frame
+
+```{r}
+glimpse(locations)
+```
+
+Select relevant columns
+
+```{r}
+small_df <- locations |> select(Date, individual_local_identifier, location_long, location_lat)
+```
+
+Group by individual
+
+```{r}
+grouped <- small_df |> group_by(individual_local_identifier, Date)
+gt(head(grouped))
+```
+Summarise data
+
+```{r}
+summ <- grouped |> summarize(
+  medianLatitude = median(location_lat),
+  medianLongitude = median(location_long)
+)
+```
+
+Find axis limits
+```{r}
+minlat = summ |> pull(medianLatitude) |> min()
+maxlat = summ |> pull(medianLatitude) |> max()
+minlon = summ |> pull(medianLongitude) |> min()
+maxlon = summ |> pull(medianLongitude) |> max()
+```
+Plot the data
+
+```{r}
+ggplot(summ, aes(x=medianLongitude, y=medianLatitude)) +
+  geom_point(aes(color = individual_local_identifier), size=2) +
+  annotation_borders(linewidth=0.2) +
+  coord_quickmap(
+    xlim=c(minlon-5, maxlon+5),
+    ylim=c(minlat-5, maxlat+5)) +
+  theme_bw() +
+  scale_color_brewer(palette = "Dark2")  +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  ggtitle("Locations of Gazelles in Mongolia")
+```
