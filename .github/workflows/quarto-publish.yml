@@ -132,7 +132,7 @@ jobs:
 
           <section>
 
-          <h2>MB1A Practicals</h2>
+          <h2>Documents</h2>
 
           <ul>
 
@@ -182,38 +182,24 @@ jobs:
 
           done
 
-
       # -----------------------------------------
-      # Create main homepage
+      # Create main Quarto homepage
       # -----------------------------------------
 
       - name: Create main homepage
         run: |
 
-          cat > public/index.html << 'EOF'
+          cat > homepage.qmd << 'EOF'
+          ---
+          title: "MB1A Practicals"
+          format:
+            html:
+              theme: flatly
+          ---
 
-          <!DOCTYPE html>
+          Select a practical below:
 
-          <html>
-
-          <head>
-
-            <meta charset="UTF-8">
-
-            <meta name="viewport"
-                  content="width=device-width, initial-scale=1">
-
-            <title>MB1A Practicals</title>
-
-          </head>
-
-          <body>
-
-          <h1>MB1A Practicals</h1>
-
-          <p>Select a practical below:</p>
-
-          <ul>
+          ## Practicals
 
           EOF
 
@@ -224,23 +210,17 @@ jobs:
 
             if [ -f "public/$folder_name/index.html" ]; then
 
-              echo "<li><a href=\"$folder_name/index.html\">$folder_name</a></li>" \
-                >> public/index.html
+              echo "- [$folder_name]($folder_name/index.html)" \
+                >> homepage.qmd
 
             fi
 
           done
 
 
-          cat >> public/index.html << 'EOF'
+          quarto render homepage.qmd \
+            --output-dir public
 
-          </ul>
-
-          </body>
-
-          </html>
-
-          EOF
 
 
       # -----------------------------------------
